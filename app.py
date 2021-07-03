@@ -3,9 +3,15 @@ import numpy as np
 import pandas as pd
 import plotly.express as px
 import base64
-
+import pickle
 
 page = st.sidebar.selectbox("Select Activity", ["Introduction", "Analytics","Percentage Prediction",])
+
+
+
+pkl_file1 = open('insurancelr.pkl', 'rb')
+
+lr = pickle.load(pkl_file1)
 
 if page=="Introduction":
     st.header("Prediction of Insurance Premium Pay Defaulters")
@@ -19,13 +25,15 @@ if page=="Introduction":
     st.subheader("* Percentage of premium amount paid by cash or credit car")
     st.subheader("* Age in years of policy holder")
     st.subheader("* Monthly Income of policy holder in rupees")
-    st.subheader("* Underwriting Score of the applicant at the time of application")
+
     st.subheader("* No of premiums late by 3 to 6 months")
     st.subheader('* No of premiums late by 6 to 12 months')
     st.subheader('* No of premiums late by more than 12 months')
     st.subheader("* Total premiums paid on time till now")
     st.subheader('* Area type of Residence ')
     st.subheader('* Sourcing channel for application ')
+    st.subheader("* Underwriting Score of the applicant at the time of application")
+    st.write("  ( Insurers use credit-based insurance scores primarily in underwriting and rating of consumers. Underwriting is the process by which the insurer determines whether a consumer is eligible for coverage and rating is the process that determines how much premium to charge a consumer.underwriting simply means that your lender verifies your income, assets, debt and property details in order to issue final approval for your loan.)")
 
 
 if page =="Percentage Prediction" :
@@ -51,14 +59,22 @@ if page =="Percentage Prediction" :
     form.text(" \n")
     x8 = form.text_input(label ="Total premiums paid on time till now")
     form.text(" \n")
-    x9 = form.selectbox('Area type of Residence ', ['Urban','Rural'], key=1)
+    x9 = form.selectbox('Area type of Residence', ['Urban','Rural'], key=1)
     form.text(" \n")
-    x10 = form.selectbox('Sourcing channel for application ', ['A','B',"C","D","E"], key=2)
+    x10 = form.selectbox('Sourcing channel for application', ['A','B',"C","D","E"], key=2)
     form.text(" \n")
 
     submit_button = form.form_submit_button(label='Predict Percentage')
     if submit_button:
-        st.write(0.9)
+
+        s = {"A":1,"B":2,"C":3,"D":4,"E":5}
+        r = {"Urban":1,"Rural":1}
+        x9 = int(r[x9])
+        x10 = int(s[x10])
+        l = [[float(x2),float(x5),float(x6),float(x6),float(x4),float(x8),x10,x9,float(x3),float(x1)]]
+        pred = lr.predict_proba(l)[:,1]
+        st.write(float(pred))
+
 
 #
 # def get_base64_of_bin_file(bin_file):
