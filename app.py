@@ -4,16 +4,32 @@ import pandas as pd
 import plotly.express as px
 import base64
 import pickle
+from PIL import Image
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 page = st.sidebar.selectbox("Select Activity", ["Introduction", "Analytics","Percentage Prediction",])
+st.sidebar.text(" \n")
+st.sidebar.text(" \n")
+st.sidebar.text(" \n")
+st.sidebar.text(" \n")
+st.sidebar.text(" \n")
+
+st.sidebar.text(" \n")
+st.sidebar.text(" \n")
 
 
+
+df = pd.read_csv("DATA.csv")
 
 pkl_file1 = open('insurancelr.pkl', 'rb')
 
 lr = pickle.load(pkl_file1)
 
 if page=="Introduction":
+    img= Image.open("l2.jpg")
+    st.sidebar.image(img)
+
     st.header("Prediction of Insurance Premium Pay Defaulters")
     st.subheader("1 Your client is an Insurance company and they need your help in building a model to predict whether the policyholder (customer) will pay next premium on time or not..")
 
@@ -22,7 +38,7 @@ if page=="Introduction":
     st.subheader("4 Now, in order to predict, whether the customer would pay the next premium or not, you have information about past premium payment history for the policyholders along with their demographics (age, monthly income, area type) and sourcing channel etc.")
 
     st.header("Features that depends on prediction of Policy payment")
-    st.subheader("* Percentage of premium amount paid by cash or credit car")
+    st.subheader("* Percentage of premium amount paid by cash or credit card")
     st.subheader("* Age in years of policy holder")
     st.subheader("* Monthly Income of policy holder in rupees")
 
@@ -31,16 +47,64 @@ if page=="Introduction":
     st.subheader('* No of premiums late by more than 12 months')
     st.subheader("* Total premiums paid on time till now")
     st.subheader('* Area type of Residence ')
-    st.subheader('* Sourcing channel for application ')
+
     st.subheader("* Underwriting Score of the applicant at the time of application")
     st.write("  ( Insurers use credit-based insurance scores primarily in underwriting and rating of consumers. Underwriting is the process by which the insurer determines whether a consumer is eligible for coverage and rating is the process that determines how much premium to charge a consumer.underwriting simply means that your lender verifies your income, assets, debt and property details in order to issue final approval for your loan.)")
+
+if page == "Analytics" :
+    img= Image.open("l2.jpg")
+    st.sidebar.image(img)
+
+    st.header("Distribution of Percentage of premium amount paid by cash or credit card")
+
+    fig = px.histogram(df, x="perc_premium_paid_by_cash_credit")
+    st.plotly_chart(fig,use_container_width=10)
+
+
+    st.header("Distribution of Age in years of policy holder")
+
+    fig = px.histogram(df, x="age_in_years")
+    st.plotly_chart(fig,use_container_width=10)
+
+    st.header("Percentage premium paid in cash and credit")
+    st.text(" \n")
+    l = [x for x in range(0,79853)]
+    df2 = df
+    df2["id"] = l
+    fig, ax = plt.subplots(1, 2, sharey='row', dpi = 100)
+    ax[0].set_title('> 85%')
+    sns.barplot(x = 'target', y = 'count', ax = ax[0],data = df2[df2.percentage_premium_paid_cash_credit > 85].groupby('target').nunique()['id'].reset_index().rename(columns = {'id': 'count'}))
+    ax[1].set_title('< 85%')
+    sns.barplot(x = 'target', y = 'count', ax = ax[1],data = df2[df2.percentage_premium_paid_cash_credit < 85].groupby('target').nunique()['id'].reset_index().rename(columns = {'id': 'count'}))
+    plt.suptitle('Percentage premium paid in cash and credit')
+    plt.savefig('WC.jpg')
+    img= Image.open("WC.jpg")
+    st.image(img)
+
+    st.header("Distribution of Income")
+
+    fig = px.histogram(df, x="Income")
+    st.plotly_chart(fig,use_container_width=10)
+
+
+
+
+
+
+
+
+
+
+
 
 
 if page =="Percentage Prediction" :
 
     st.header("Prediction of Insurance Premium Pay Defaulters")
-    st.subheader("Your client is an Insurance company and they need your help in building a model to predict whether the policyholder (customer) will pay next premium on time or not..")
+    #st.subheader("Your client is an Insurance company and they need your help in building a model to predict whether the policyholder (customer) will pay next premium on time or not..")
     st.text(" \n")
+    img= Image.open("l2.jpg")
+    st.image(img)
     form = st.form(key='my_form2')
 
     x1 = form.text_input(label='Age in years of policy holder')
@@ -61,7 +125,7 @@ if page =="Percentage Prediction" :
     form.text(" \n")
     x9 = form.selectbox('Area type of Residence', ['Urban','Rural'], key=1)
     form.text(" \n")
-    x10 = form.selectbox('Sourcing channel for application', ['A','B',"C","D","E"], key=2)
+
     form.text(" \n")
 
     submit_button = form.form_submit_button(label='Predict Percentage')
@@ -70,8 +134,8 @@ if page =="Percentage Prediction" :
         s = {"A":1,"B":2,"C":3,"D":4,"E":5}
         r = {"Urban":1,"Rural":1}
         x9 = int(r[x9])
-        x10 = int(s[x10])
-        l = [[float(x2),float(x5),float(x6),float(x6),float(x4),float(x8),x10,x9,float(x3),float(x1)]]
+
+        l = [[float(x2),float(x5),float(x6),float(x7),float(x4),float(x8),x9,float(x3),float(x1)]]
         pred = lr.predict_proba(l)[:,1]
         st.write(float(pred))
 
